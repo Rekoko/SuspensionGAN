@@ -46,6 +46,9 @@ discriminator model such as RNNs or Transformers.
 (5) utils.py
 - Some utility functions for metrics and timeGAN.
 
+(6) timegan_v2.py
+- Port of timegan.py to tensorflow 2.x
+
 ### Command inputs:
 
 -   data_name: sine, stock, or energy

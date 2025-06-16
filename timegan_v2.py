@@ -97,19 +97,11 @@ def timegan (ori_data, parameters):
     T = max_seq_len
     Z = tf.random.normal(shape=(batch_size, seq_len, z_dim))
 
-    cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-    mse = tf.keras.losses.MeanSquaredError()
-
-
     embedder = StackedRNNModel(num_layers, hidden_dim, hidden_dim, activation='sigmoid')
     recovery = StackedRNNModel(num_layers, hidden_dim, dim, activation='sigmoid')
     generator = StackedRNNModel(num_layers, hidden_dim, hidden_dim, activation='sigmoid')
     supervisor = StackedRNNModel(num_layers - 1, hidden_dim, hidden_dim, activation='sigmoid')
     discriminator = StackedRNNModel(num_layers, hidden_dim, 1, activation=None)
-
-        
-    # Variables        
-    d_vars = discriminator.trainable_variables
         
     # Discriminator loss
     bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
