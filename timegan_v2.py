@@ -23,54 +23,6 @@ class StackedRNNModel(tf.keras.Model):
             X = lstm_layer(X, mask=mask)
         H = self.output_layer(X)
         return H
-    
-class Embedder(tf.keras.Model):
-    def __init__(self, num_layers, hidden_dim, output_dim):
-        super().__init__()
-        self.rnn_layers = stacked_rnn(num_layers, hidden_dim)
-        self.output_layer = tf.keras.layers.Dense(output_dim, activation='sigmoid')
-
-    def call(self, X, T):
-        # X shape: [batch_size, max_seq_len, dim]
-        mask = tf.sequence_mask(T, maxlen=tf.shape(X)[1])  # Create mask
-        for lstm_layer in self.rnn_layers:
-            X = lstm_layer(X, mask=mask)
-        H = self.output_layer(X)
-        return H
-
-class Recovery(tf.keras.Model):
-    def __init__(self, num_layers, hidden_dim, output_dim):
-        super().__init__()
-        self.rnn_layers = stacked_rnn(num_layers, hidden_dim)
-        self.output_layer = tf.keras.layers.Dense(output_dim, activation='sigmoid')
-
-    def call(self, X, T):
-        # X shape: [batch_size, max_seq_len, dim]
-        mask = tf.sequence_mask(T, maxlen=tf.shape(X)[1])  # Create mask
-        for lstm_layer in self.rnn_layers:
-            X = lstm_layer(X, mask=mask)
-        X_tilde = self.output_layer(X)
-        return X_tilde
-
-class Generator(tf.keras.Model):
-    def __init__(self, num_layers, hidden_dim, output_dim):
-        super().__init__()
-        self.rnn_layers = stacked_rnn(num_layers, hidden_dim)
-        self.output_layer = tf.keras.layers.Dense(output_dim, activation='sigmoid')
-
-        
-class Supervisor(tf.keras.Model):
-    def __init__(self, num_layers, hidden_dim, output_dim):
-        super().__init__()
-        self.rnn_layers = stacked_rnn(num_layers, hidden_dim)
-        self.output_layer = tf.keras.layers.Dense(output_dim, activation='sigmoid')
-
-        
-class Discriminator(tf.keras.Model):
-    def __init__(self, num_layers, hidden_dim, output_dim):
-        super().__init__()
-        self.rnn_layers = stacked_rnn(num_layers, hidden_dim)
-        self.output_layer = tf.keras.layers.Dense(output_dim, activation='sigmoid')
 
         
 
@@ -97,10 +49,10 @@ def timegan (ori_data, parameters):
     T = max_seq_len
     Z = tf.random.normal(shape=(batch_size, seq_len, z_dim))
 
-    embedder = StackedRNNModel(num_layers, hidden_dim, hidden_dim, activation='sigmoid')
+    embedder = StackedRNNModel(num_layers, hidden_dim, dim, activation='sigmoid')
     recovery = StackedRNNModel(num_layers, hidden_dim, dim, activation='sigmoid')
-    generator = StackedRNNModel(num_layers, hidden_dim, hidden_dim, activation='sigmoid')
-    supervisor = StackedRNNModel(num_layers - 1, hidden_dim, hidden_dim, activation='sigmoid')
+    generator = StackedRNNModel(num_layers, hidden_dim, output_dim=dim, activation='sigmoid')
+    supervisor = StackedRNNModel(num_layers - 1, hidden_dim, output_dim=dim, activation='sigmoid')
     discriminator = StackedRNNModel(num_layers, hidden_dim, 1, activation=None)
         
     # Discriminator loss
